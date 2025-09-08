@@ -1,12 +1,197 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title></title>
-	<link rel="stylesheet" href="">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Búsqueda – Productos, Clientes y Pedidos</title>
+
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
+      --accent:#22d3ee; --accent-2:#06b6d4; --ok:#10b981;
+      --danger:#ef4444; --chip:#1f2937; --border:#1f2937;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:linear-gradient(180deg, #0b1220, #0f172a 40%);
+      color:var(--text); min-height:100vh; display:flex;
+      align-items:center; justify-content:center; padding:24px;
+    }
+    .container{ width:min(1100px, 100%); }
+    .card{
+      background:linear-gradient(180deg, #0b1220, #0e1628);
+      border:1px solid var(--border); border-radius:18px; padding:22px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    h1{ margin:0 0 8px; font-size:clamp(1.2rem,2.5vw,1.8rem); }
+    .sub{ color:var(--muted); margin:0 0 18px; }
+    .filters{ display:grid; gap:12px; grid-template-columns:repeat(12,1fr); align-items:end; margin:14px 0 18px; }
+    .field{ display:flex; flex-direction:column; gap:6px; grid-column: span 12; }
+    label{ font-size:.9rem; color:var(--muted); }
+    input,select,button{
+      height:42px; padding:0 12px; border-radius:12px; border:1px solid var(--border);
+      background:#0b1323; color:var(--text); outline:none;
+    }
+    .field--third{ grid-column: span 12; }
+    .field--quarter{ grid-column: span 6; }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap }
+    .btn{
+      border:1px solid var(--accent-2);
+      background: radial-gradient(120px 120px at 20% 20%, rgba(34,211,238,.15), transparent 35%), #0c1728;
+      color:#e6fffb; font-weight:600; cursor:pointer;
+      transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(6,182,212,.25); }
+    .btn.sec{ border-color:#334155; color:var(--muted); background:#0b1323 }
+    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; background:var(--chip); color:#cbd5e1; font-size:.78rem; border:1px solid var(--border); }
+    .table-wrap{ overflow:auto; border:1px solid var(--border); border-radius:14px; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; min-width:720px }
+    thead th{
+      position:sticky; top:0; background:#0b1323; color:#cbd5e1;
+      text-align:left; font-weight:600; padding:12px; border-bottom:1px solid var(--border);
+    }
+    tbody td{ padding:12px; border-bottom:1px solid var(--border); color:#e2e8f0 }
+    tbody tr:hover{ background:#0b1422 }
+    .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px }
+    .hint{ color:var(--muted); font-size:.86rem }
+    .loading{ color:var(--accent); }
+    .error{ color:var(--danger); }
+    @media(min-width:720px){
+      .field--third{ grid-column: span 4; }
+      .field--quarter{ grid-column: span 3; }
+    }
+  </style>
 </head>
 <body>
-	
+  <div class="container">
+    <div class="card">
+      <div class="row">
+        <div>
+          <h1>Buscador de Inventario y Ventas</h1>
+          <p class="sub">Consulta <span class="badge">Productos</span> • <span class="badge">Clientes</span> • <span class="badge">Pedidos</span></p>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="field field--third">
+          <label>Tipo de búsqueda</label>
+          <select id="tipo">
+            <option value="productos">Productos</option>
+            <option value="clientes">Clientes</option>
+            <option value="pedidos">Pedidos</option>
+          </select>
+        </div>
+
+        <div class="field field--third">
+          <label>Búsqueda (texto)</label>
+          <input id="q" type="text" placeholder="Ej.: proteína, Ana López, PED-1001..." />
+        </div>
+
+        <div class="field field--quarter">
+          <label>Desde</label>
+          <input id="desde" type="date" />
+        </div>
+        <div class="field field--quarter">
+          <label>Hasta</label>
+          <input id="hasta" type="date" />
+        </div>
+
+        <div class="field field--third actions">
+          <button id="btnBuscar" class="btn" type="button">Buscar</button>
+          <button id="btnLimpiar" class="btn sec" type="button">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <span id="estado" class="hint">Listo para buscar…</span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tabla">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="row">
+        <span id="conteo" class="hint"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const thead = document.getElementById('thead');
+    const tbody = document.getElementById('tbody');
+    const estado = document.getElementById('estado');
+    const conteo = document.getElementById('conteo');
+
+    function setStatus(msg, cls='hint'){ estado.className = cls; estado.textContent = msg; }
+
+    function columnasPorTipo(tipo) {
+      if (tipo === 'productos') {
+        return ['IdProducto','NombreProducto','Precio','Categoria','FechaIngreso','FechaVencimiento'];
+      }
+      if (tipo === 'clientes') {
+        return ['IdCliente','NombreCliente','Correo','Telefono','Direccion'];
+      }
+      return ['IdPedido','Cliente','FechaPedido','EstadoPedido','Total'];
+    }
+
+    function renderHead(cols){
+      thead.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+    }
+
+    function renderBody(rows, cols){
+      tbody.innerHTML = rows.map(r => {
+        return '<tr>' + cols.map(c => `<td>${r[c] ?? ''}</td>`).join('') + '</tr>';
+      }).join('');
+    }
+
+    async function buscar(){
+      const tipo = document.getElementById('tipo').value;
+      const q = document.getElementById('q').value.trim();
+      const desde = document.getElementById('desde').value;
+      const hasta = document.getElementById('hasta').value;
+
+      const params = new URLSearchParams({ tipo, q, desde, hasta });
+      setStatus('Buscando…', 'loading');
+
+      try {
+        const res = await fetch(`api/buscar.php?${params.toString()}`, { cache: 'no-store' });
+        if(!res.ok) throw new Error('No se pudo obtener resultados');
+        const data = await res.json();
+
+        if (data.error){
+          setStatus(data.error, 'error');
+          thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
+          return;
+        }
+
+        const cols = columnasPorTipo(tipo);
+        renderHead(cols);
+        renderBody(data.resultados || [], cols);
+
+        conteo.textContent = `${data.resultados.length} resultado(s)`;
+        setStatus('Listo.');
+      } catch (e){
+        setStatus('Error: ' + e.message, 'error');
+        thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
+      }
+    }
+
+    document.getElementById('btnBuscar').addEventListener('click', buscar);
+    document.getElementById('btnLimpiar').addEventListener('click', () => {
+      document.getElementById('q').value = '';
+      document.getElementById('desde').value = '';
+      document.getElementById('hasta').value = '';
+      thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
+      setStatus('Listo para buscar…');
+    });
+
+    document.getElementById('q').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') buscar();
+    });
+  </script>
 </body>
 </html>
