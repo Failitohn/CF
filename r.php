@@ -5,7 +5,7 @@ header('Content-Type: application/json; charset=utf-8');
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "mi_base";
+$db   = "CF";
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
