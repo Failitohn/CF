@@ -1,0 +1,231 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Sabor Express | Iniciar Sesión</title>
+
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+
+      <style>
+        /* --- Estilos personalizados para Sabor Express --- */
+        :root {
+          --se-primary: #86b96e; /* Green */
+          --se-secondary: #f0ad4e; /* Orange */
+          --se-dark: #2c3e50; /* Dark blue-grey */
+          --se-light: #ecf0f1; /* Light grey */
+          --se-text-dark: #34495e; /* Darker blue-grey for text */
+        }
+
+        body.login-page {
+          background: linear-gradient(135deg, var(--se-dark) 0%, #34495e 100%);
+          color: #fff;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          margin: 0;
+          padding: 1rem;
+        }
+
+        .login-box {
+          width: 100%;
+          max-width: 500px;
+          animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .login-logo {
+          text-align: center;
+          margin-bottom: 1.5rem;
+        }
+
+        .login-logo a {
+          color: #fff;
+          font-weight: bold;
+          font-size: 2rem;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+          text-decoration: none;
+        }
+
+        .login-logo img {
+          width: 150px;
+          height: auto;
+          border-radius: 50%;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+          transition: transform 0.3s ease;
+        }
+
+        .login-logo img:hover {
+          transform: scale(1.05);
+        }
+
+        .card.login-card-body {
+          background: var(--se-light);
+          border: 1px solid var(--se-dark);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+        }
+
+        .login-box-msg,
+        .social-auth-links p,
+        .text-center,
+        .form-check-label {
+          color: var(--se-text-dark);
+        }
+
+        .form-control {
+          background-color: #fff;
+          border: 1px solid #ccc;
+          color: var(--se-text-dark);
+          transition: box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+          background-color: #f8f9fa;
+          border-color: var(--se-primary);
+          box-shadow: 0 0 5px rgba(134, 185, 110, 0.5);
+        }
+
+        .form-control::placeholder {
+          color: #999;
+        }
+
+        .input-group-text {
+          background-color: #f8f9fa;
+          border: 1px solid #ccc;
+          border-left: none;
+          color: var(--se-dark);
+        }
+        
+        .btn {
+          text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-se-primary {
+          background-color: var(--se-primary);
+          border-color: var(--se-primary);
+          color: white;
+        }
+
+        .btn-se-primary:hover {
+          background-color: #72a35d;
+          border-color: #72a35d;
+        }
+
+        .btn-se-info {
+          background: var(--se-secondary);
+          border-color: var(--se-secondary);
+          color: white;
+        }
+
+        .btn-se-info:hover {
+          background: #e09939;
+          border-color: #e09939;
+        }
+
+        a {
+          color: var(--se-primary);
+          transition: color 0.3s ease;
+        }
+
+        a:hover {
+          color: #72a35d;
+        }
+
+      </style>
+    </head>
+    <body class="login-page">
+      <div class="login-box container-fluid px-3 px-sm-4 px-md-5">
+        <div class="login-logo">
+          <a href="login.html">
+            <img src="logo1.png" alt="Sabor Express Logo" class="img-fluid opacity-75 shadow" />
+            <span class="d-block mt-2" style="font-family: 'Source Sans 3', sans-serif; font-weight: 600;">
+             SuperHN | Iniciar Sesión
+            </span>
+          </a>
+        </div>
+        <div class="card login-card-body w-100">
+          <div class="card-body">
+            <p class="login-box-msg">Inicia sesión para comenzar tu día</p>
+            <form action="../index.html" method="post" id="loginForm">
+              <div class="input-group mb-3">
+                <input type="email" class="form-control" id="email" placeholder="Email" required />
+                <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+              </div>
+              <div class="input-group mb-3">
+                <input type="password" class="form-control" id="password" placeholder="Contraseña" required />
+                <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+              </div>
+              <div class="row g-2">
+                <div class="col-12 col-sm-8">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="flexCheckDefault" />
+                    <label class="form-check-label" for="flexCheckDefault">Recordarme</label>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <button type="submit" class="btn btn-se-primary w-100">Entrar</button>
+                </div>
+              </div>
+            </form>
+            <p class="mb-1 mt-4"><a href="#">Olvidé mi contraseña</a></p>
+            <p class="mb-0"><a href="register.html" class="text-center">Registrar una nueva membresía</a></p>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        loginForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+
+          const emailValue = emailInput.value.trim();
+          const passwordValue = passwordInput.value.trim();
+
+          if (emailValue === '') {
+            alert('Por favor, ingresa tu dirección de email.');
+            emailInput.focus();
+            return;
+          }
+          const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+          if (!emailRegex.test(emailValue)) {
+            alert('Por favor, ingresa una dirección de email válida.');
+            emailInput.focus();
+            return;
+          }
+
+          if (passwordValue === '') {
+            alert('Por favor, ingresa tu contraseña.');
+            passwordInput.focus();
+            return;
+          }
+
+          // Modificación: Redirigir a c.html y pasar el email en el parámetro de URL
+          window.location.href = `../inicio.html?email=${encodeURIComponent(emailValue)}`;
+        });
+      </script>
+    </body>
+    </html>
