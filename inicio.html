@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>SuperHN | Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#343a40" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#212529" media="(prefers-color-scheme: dark)" />
+<meta name="title" content="SuperHN | Dashboard" />
+<meta name="author" content="Juan Lopez" />
+<meta name="description" content="Dashboard de gestión para SuperHN, para el control de inventario y ventas." />
+<link rel="preload" href="./css/adminlte.css" as="style" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" crossorigin="anonymous" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous" />
+<link rel="stylesheet" href="./css/adminlte.css" />
+<style>
+/* --- Custom Colors & Styles for SuperHN --- */
+:root {
+--se-primary: #86b96e; /* Green */
+--se-secondary: #f0ad4e; /* Orange */
+--se-dark: #2c3e50; /* Dark blue-grey */
+--se-light: #ecf0f1; /* Light grey */
+--se-text-dark: #34495e; /* Darker blue-grey for text */
+}
+.bg-se-primary { background-color: var(--se-primary) !important; }
+.bg-se-dark { background-color: var(--se-dark) !important; }
+.text-se-primary { color: var(--se-primary) !important; }
+.btn-se-primary {
+background-color: var(--se-primary);
+color: white;
+}
+.btn-se-primary:hover { background-color: #72a35d; }
+.btn-se-secondary {
+background-color: var(--se-secondary);
+color: white;
+}
+.btn-se-secondary:hover { background-color: #e09939; }
+.app-header, .app-sidebar { background-color: var(--se-dark) !important; }
+.app-sidebar .nav-link.active {
+background-color: var(--se-primary) !important;
+color: white !important;
+}
+.app-sidebar .nav-link:not(.active):hover { background-color: rgba(255, 255, 255, 0.1) !important; }
+.app-main { background-color: var(--se-light); }
+.app-footer {
+background-color: #f8f9fa;
+border-top: 1px solid #dee2e6;
+}
+.inventory-card {
+background-color: white;
+border-radius: 12px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+h1, h2, h3, h4 { color: var(--se-text-dark); }
+.badge-se { background-color: var(--se-primary); color: white; }
+.btn-se {
+border-radius: 8px;
+font-weight: 600;
+transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.btn-se:hover { transform: translateY(-1px); }
+.btn-se.sec {
+background: var(--se-light);
+color: var(--se-text-dark);
+border: 1px solid #ced4da;
+}
+.btn-se.sec:hover { background: #e9ecef; }
+.table-wrap {
+border-radius: 10px;
+overflow: hidden;
+}
+thead th {
+background-color: var(--se-dark) !important;
+color: white;
+}
+tbody td { font-size: 0.95rem; }
+tbody tr:hover { background-color: #f8f9fa; }
+.status-text {
+font-weight: 500;
+margin-top: 10px;
+}
+.status-text.ok { color: #28a745; }
+.status-text.error { color: #dc3545; }
+.status-text.loading { color: #ffc107; }
+
+/* Dashboard styles */
+.jumbotron {
+background-color: #fff;
+border-radius: 12px;
+padding: 2rem;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+.info-box {
+background-color: #fff;
+border-radius: 10px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+padding: 1.5rem;
+text-align: center;
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.info-box:hover {
+transform: translateY(-5px);
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.info-box .icon {
+font-size: 3rem;
+color: var(--se-primary);
+margin-bottom: 0.5rem;
+}
+.info-section {
+background-color: #fff;
+border-radius: 12px;
+padding: 2rem;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+margin-top: 2rem;
+}
+.contact-form .form-label {
+font-weight: 600;
+color: var(--se-text-dark);
+}
+.contact-form .form-control {
+border-radius: 8px;
+border: 1px solid #ced4da;
+}
+.contact-form .btn-se-primary {
+width: 100%;
+}
+</style>
+</head>
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+<div class="app-wrapper">
+<nav class="app-header navbar navbar-expand bg-se-dark">
+<div class="container-fluid">
+<ul class="navbar-nav">
+<li class="nav-item">
+<a class="nav-link text-white" data-lte-toggle="sidebar" href="#" role="button">
+<i class="bi bi-list"></i>
+</a>
+</li>
+<li class="nav-item d-none d-md-block">
+<a href="inicio.html" class="nav-link active text-white">Inicio</a>
+</li>
+<li class="nav-item d-none d-md-block">
+<a href="contactos.html" class="nav-link text-white">Contacto</a>
+</li>
+</ul>
+<ul class="navbar-nav ms-auto">
+<li class="nav-item dropdown user-menu">
+<a href="#" class="nav-link dropdown-toggle text-white" data-bs-toggle="dropdown">
+<img src="assets" class="user-image rounded-circle shadow" alt="User Image" />
+<span class="d-none d-md-inline" style="color:white;" id="userEmailHeader">Invitado</span>
+</a>
+<ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end bg-se-dark">
+<li class="user-header bg-se-primary">
+<img src="assets/img/user-photo.jpg" class="rounded-circle shadow" alt="User Image" />
+<p class="text-white">
+<span id="userEmailDisplay">Invitado</span> - Usuario
+<small>No miembro</small>
+</p>
+</li>
+<li class="user-footer d-flex justify-content-between">
+<a href="#" class="btn btn-se btn-se-secondary">Perfil</a>
+<a href="login.html" class="btn btn-se btn-se-secondary">Cerrar sesión</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<aside class="app-sidebar bg-se-dark" data-bs-theme="dark">
+<div class="sidebar-brand text text-white">
+<a href="./index.html" class="brand-link">
+<img src="logo1.png" alt="SuperHN Logo" class="brand-image opacity-75 shadow" />
+<span class="brand-text fw-light" style="font-size: 1.5rem;">SuperHN</span>
+</a>
+</div>
+<div class="sidebar-wrapper">
+<nav class="mt-2">
+<ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" aria-label="Main navigation" data-accordion="false" id="navigation">
+
+<li class="nav-header">GESTIÓN DE CLIENTES</li>
+<li class="nav-item">
+<a href="c.html" class="nav-link">
+<i class="nav-icon bi bi-person-plus"></i>
+<p>Añadir Cliente</p>
+</a>
+</li>
+<li class="nav-item">
+<a href="r.html" class="nav-link">
+<i class="nav-icon bi bi-person-lines-fill"></i>
+<p>Buscar Clientes</p>
+</a>
+</li>
+<li class="nav-item">
+<a href="u.html" class="nav-link">
+<i class="nav-icon bi bi-person-gear"></i>
+<p>Modificar Cliente</p>
+</a>
+</li>
+<li class="nav-item">
+<a href="d.html" class="nav-link">
+<i class="nav-icon bi bi-person-dash"></i>
+<p>Eliminar Cliente</p>
+</a>
+</li>
+<li class="nav-header">ACCESOS</li>
+<li class="nav-item">
+<a href="./examples/login.html" class="nav-link">
+<i class="nav-icon bi bi-box-arrow-in-right"></i>
+<p>Iniciar Sesión</p>
+</a>
+</li>
+<li class="nav-item">
+<a href="./examples/register.html" class="nav-link">
+<i class="nav-icon bi bi-person-add"></i>
+<p>Registrarse</p>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</aside>
+<main class="app-main">
+<div class="app-content-header">
+<div class="container-fluid">
+<div class="row">
+<div class="col-sm-6">
+<h3 class="mb-0">Inicio</h3>
+</div>
+<div class="col-sm-6">
+<ol class="breadcrumb float-sm-end">
+<li class="breadcrumb-item"><a href="#">Inicio</a></li>
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="app-content">
+<div class="container-fluid">
+<div class="jumbotron">
+<h1 class="display-4">¡Bienvenido a SuperHN!</h1>
+<p class="lead">Este es el panel de control. Aquí puedes gestionar todos los aspectos de tu negocio.</p>
+<hr class="my-4">
+<p>Utiliza el menú de la izquierda para navegar entre las diferentes secciones y herramientas de gestión.</p>
+</div>
+<div class="row mt-4">
+<div class="col-md-4 mb-3">
+<div class="info-box">
+<div class="icon"><i class="bi bi-cart"></i></div>
+<h4>Ventas Hoy</h4>
+<p class="display-6">$1,250</p>
+</div>
+</div>
+<div class="col-md-4 mb-3">
+<div class="info-box">
+<div class="icon"><i class="bi bi-person-check"></i></div>
+<h4>Nuevos Clientes</h4>
+<p class="display-6">15</p>
+</div>
+</div>
+<div class="col-md-4 mb-3">
+<div class="info-box">
+<div class="icon"><i class="bi bi-boxes"></i></div>
+<h4>Inventario</h4>
+<p class="display-6">500</p>
+</div>
+</div>
+</div>
+<div class="info-section">
+<h2>¿Quiénes Somos?</h2>
+<p>SuperHN nació en Tegucigalpa, Honduras, con la visión de ofrecer productos de alta calidad a precios bajos. Comenzamos como un pequeño negocio local con el objetivo de servir a nuestra comunidad con un trato cercano y personalizado. Con el tiempo, hemos crecido y expandido nuestra oferta, pero nuestro compromiso con la calidad y los precios accesibles sigue siendo la base de todo lo que hacemos.</p>
+</div>
+<div class="info-section">
+<h2>Contacto y Comentarios</h2>
+<p>¿Tienes alguna pregunta, sugerencia o comentario? Nos encantaría escucharte. Usa el formulario a continuación para enviarnos tu mensaje.</p>
+<form class="contact-form">
+<div class="mb-3">
+<label for="name" class="form-label">Nombre Completo</label>
+<input type="text" class="form-control" id="name" placeholder="Tu nombre" required>
+</div>
+<div class="mb-3">
+<label for="email" class="form-label">Correo Electrónico</label>
+<input type="email" class="form-control" id="email" placeholder="nombre@ejemplo.com" required>
+</div>
+<div class="mb-3">
+<label for="message" class="form-label">Mensaje o Comentario</label>
+<textarea class="form-control" id="message" rows="5" placeholder="Escribe tu mensaje aquí..." required></textarea>
+</div>
+<button type="submit" class="btn btn-se-primary">Enviar Comentario</button>
+</form>
+</div>
+</div>
+</div>
+</main>
+<footer class="app-footer">
+<div class="float-end d-none d-sm-inline" style="font-style: normal;">
+¡Precios bajos todo el tiempo!
+</div>
+<strong>
+Copyright &copy; 2024- 2025
+&nbsp;
+<a href="#" class="text-decoration-none" style="font-style: normal;">SuperHN</a>.
+</strong>
+<span style="font-style: normal;">Todos los derechos reservados.</span>
+</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script src="./js/adminlte.js"></script>
+<script>
+const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+const Default = {
+scrollbarTheme: 'os-theme-light',
+scrollbarAutoHide: 'leave',
+scrollbarClickScroll: true,
+};
+document.addEventListener('DOMContentLoaded', function () {
+const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+if (sidebarWrapper && OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined) {
+OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+scrollbars: {
+theme: Default.scrollbarTheme,
+autoHide: Default.scrollbarAutoHide,
+clickScroll: Default.scrollbarClickScroll,
+},
+});
+}
+});
+const urlParams = new URLSearchParams(window.location.search);
+const userEmail = urlParams.get('email');
+const emailDisplayElement = document.getElementById('userEmailDisplay');
+const emailHeaderElement = document.getElementById('userEmailHeader');
+if (userEmail) {
+if (emailDisplayElement) {
+emailDisplayElement.textContent = decodeURIComponent(userEmail);
+}
+if (emailHeaderElement) {
+emailHeaderElement.textContent = decodeURIComponent(userEmail);
+}
+}
+</script>
+</body>
+</html>
