@@ -1,325 +1,469 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Búsqueda y Actualización de Inventario</title>
-
-  <style>
-    :root{
-      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
-      --accent:#22d3ee; --accent-2:#06b6d4; --ok:#10b981;
-      --danger:#ef4444; --chip:#1f2937; --border:#1f2937;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:linear-gradient(180deg, #0b1220, #0f172a 40%);
-      color:var(--text); min-height:100vh; display:flex;
-      align-items:center; justify-content:center; padding:24px;
-    }
-    .container{ width:min(1100px, 100%); }
-    .card{
-      background:linear-gradient(180deg, #0b1220, #0e1628);
-      border:1px solid var(--border); border-radius:18px; padding:22px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    h1{ margin:0 0 8px; font-size:clamp(1.2rem,2.5vw,1.8rem); }
-    h2{ font-size:1.5rem; margin:0 0 8px; }
-    .sub{ color:var(--muted); margin:0 0 18px; }
-    .filters{ display:grid; gap:12px; grid-template-columns:repeat(12,1fr); align-items:end; margin:14px 0 18px; }
-    .field{ display:flex; flex-direction:column; gap:6px; grid-column: span 12; }
-    label{ font-size:.9rem; color:var(--muted); }
-    input,select,button{
-      height:42px; padding:0 12px; border-radius:12px; border:1px solid var(--border);
-      background:#0b1323; color:var(--text); outline:none;
-    }
-    .field--third{ grid-column: span 12; }
-    .field--quarter{ grid-column: span 6; }
-    .actions{ display:flex; gap:10px; flex-wrap:wrap }
-    .btn{
-      border:1px solid var(--accent-2);
-      background: radial-gradient(120px 120px at 20% 20%, rgba(34,211,238,.15), transparent 35%), #0c1728;
-      color:#e6fffb; font-weight:600; cursor:pointer;
-      transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(6,182,212,.25); }
-    .btn.sec{ border-color:#334155; color:var(--muted); background:#0b1323 }
-    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; background:var(--chip); color:#cbd5e1; font-size:.78rem; border:1px solid var(--border); }
-    .table-wrap{ overflow:auto; border:1px solid var(--border); border-radius:14px; }
-    table{ width:100%; border-collapse:separate; border-spacing:0; min-width:720px }
-    thead th{
-      position:sticky; top:0; background:#0b1323; color:#cbd5e1;
-      text-align:left; font-weight:600; padding:12px; border-bottom:1px solid var(--border);
-    }
-    tbody td{ padding:12px; border-bottom:1px solid var(--border); color:#e2e8f0 }
-    tbody tr:hover{ background:#0b1422 }
-    .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px }
-    .hint{ color:var(--muted); font-size:.86rem }
-    .loading{ color:var(--accent); }
-    .error{ color:var(--danger); }
-    .ok { color: var(--ok); }
-    @media(min-width:720px){
-      .field--third{ grid-column: span 4; }
-      .field--quarter{ grid-column: span 3; }
-    }
-  </style>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Sabor Express | Modificar Producto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#343a40" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#212529" media="(prefers-color-scheme: dark)" />
+<meta name="title" content="Sabor Express | Dashboard" />
+<meta name="author" content="Juan Lopez" />
+<meta name="description" content="Dashboard de gestión para Sabor Express, para el control de inventario y ventas." />
+<link rel="preload" href="./css/adminlte.css" as="style" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" crossorigin="anonymous" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous" />
+<link rel="stylesheet" href="./css/adminlte.css" />
+<style>
+ /* --- Custom Colors & Styles for Sabor Express --- */
+ :root {
+  --se-primary: #86b96e; /* Green */
+  --se-secondary: #f0ad4e; /* Orange */
+  --se-dark: #2c3e50; /* Dark blue-grey */
+  --se-light: #ecf0f1; /* Light grey */
+  --se-text-dark: #34495e; /* Darker blue-grey for text */
+ }
+ .bg-se-primary { background-color: var(--se-primary) !important; }
+ .bg-se-dark { background-color: var(--se-dark) !important; }
+ .text-se-primary { color: var(--se-primary) !important; }
+ .btn-se-primary {
+  background-color: var(--se-primary);
+  color: white;
+ }
+ .btn-se-primary:hover { background-color: #72a35d; }
+ .btn-se-secondary {
+  background-color: var(--se-secondary);
+  color: white;
+ }
+ .btn-se-secondary:hover { background-color: #e09939; }
+ .btn-danger {
+  background-color: #dc3545 !important;
+  color: white;
+ }
+ .btn-danger:hover {
+  background-color: #c82333 !important;
+ }
+ .app-header, .app-sidebar { background-color: var(--se-dark) !important; }
+ .app-sidebar .nav-link.active {
+  background-color: var(--se-primary) !important;
+  color: white !important;
+ }
+ .app-sidebar .nav-link:not(.active):hover { background-color: rgba(255, 255, 255, 0.1) !important; }
+ .app-main { background-color: var(--se-light); }
+ .app-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+ }
+ .inventory-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+ }
+ h1, h2 { color: var(--se-text-dark); }
+ .badge-se { background-color: var(--se-primary); color: white; }
+ .btn-se {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+ }
+ .btn-se:hover { transform: translateY(-1px); }
+ .btn-se.sec {
+  background: var(--se-light);
+  color: var(--se-text-dark);
+  border: 1px solid #ced4da;
+ }
+ .btn-se.sec:hover { background: #e9ecef; }
+ .table-wrap {
+  border-radius: 10px;
+  overflow: hidden;
+ }
+ thead th {
+  background-color: var(--se-dark) !important;
+  color: white;
+ }
+ tbody td { font-size: 0.95rem; }
+ tbody tr:hover { background-color: #f8f9fa; }
+ .status-text {
+  font-weight: 500;
+  margin-top: 10px;
+ }
+ .status-text.ok { color: #28a745; }
+ .status-text.error { color: #dc3545; }
+ .status-text.loading { color: #ffc107; }
+ .modal-header {
+  background-color: var(--se-dark);
+  color: white;
+  border-bottom: none;
+ }
+ .modal-header .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+ }
+ .modal-footer {
+  border-top: none;
+ }
+</style>
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <div class="row">
-        <div>
-          <h1>Buscador de Inventario y Ventas</h1>
-          <p class="sub">Consulta <span class="badge">Productos</span> • <span class="badge">Clientes</span> • <span class="badge">Pedidos</span></p>
-        </div>
-      </div>
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+<div class="app-wrapper">
+ <nav class="app-header navbar navbar-expand bg-se-dark">
+ <div class="container-fluid">
+  <ul class="navbar-nav">
+  <li class="nav-item">
+   <a class="nav-link text-white" data-lte-toggle="sidebar" href="#" role="button">
+   <i class="bi bi-list"></i>
+   </a>
+  </li>
+  <li class="nav-item d-none d-md-block">
+   <a href="index.html" class="nav-link text-white">Inicio</a>
+  </li>
+  <li class="nav-item d-none d-md-block">
+   <a href="#" class="nav-link text-white">Contacto</a>
+  </li>
+  </ul>
+  <ul class="navbar-nav ms-auto">
+  <li class="nav-item dropdown user-menu">
+   <a href="#" class="nav-link dropdown-toggle text-white" data-bs-toggle="dropdown">
+   <img src="./assets/img/user-photo.jpg" class="user-image rounded-circle shadow" alt="User Image" />
+   <span class="d-none d-md-inline" style="color:white;">Administrador</span>
+   </a>
+   <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end bg-se-dark">
+   <li class="user-header bg-se-primary">
+    <img src="./assets/img/user-photo.jpg" class="rounded-circle shadow" alt="User Image" />
+    <p class="text-white">
+    Administrador - Gerente
+    <small>Miembro desde 2024</small>
+    </p>
+   </li>
+   <li class="user-footer d-flex justify-content-between">
+    <a href="#" class="btn btn-se btn-se-secondary">Perfil</a>
+    <a href="examples/login.html" class="btn btn-se btn-se-secondary">Cerrar sesión</a>
+   </li>
+   </ul>
+  </li>
+  </ul>
+ </div>
+ </nav>
+ <aside class="app-sidebar bg-se-dark" data-bs-theme="dark">
+ <div class="sidebar-brand text text-white">
+  <a href="./index.html" class="brand-link">
+  <img src="assets/img/logo-sabor.png" alt="Sabor Express Logo" class="brand-image opacity-75 shadow" />
+  <span class="brand-text fw-light" style="font-size: 1.5rem;">Sabor Express</span>
+  </a>
+ </div>
+ <div class="sidebar-wrapper">
+  <nav class="mt-2">
+  <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" aria-label="Main navigation" data-accordion="false" id="navigation">
+   <li class="nav-header">MENÚ PRINCIPAL</li>
+   <li class="nav-item">
+   <a href="c.html" class="nav-link">
+    <i class="nav-icon bi bi-person-plus"></i>
+    <p>Añadir Cliente</p>
+   </a>
+   </li>
+   <li class="nav-item">
+   <a href="r.html" class="nav-link">
+    <i class="nav-icon bi bi-search"></i>
+    <p>Buscar Productos</p>
+   </a>
+   </li>
+   <li class="nav-item">
+   <a href="u.html" class="nav-link active">
+    <i class="nav-icon bi bi-box-seam"></i>
+    <p>Modificar Producto</p>
+   </a>
+   </li>
+   <li class="nav-item">
+   <a href="d.html" class="nav-link">
+    <i class="nav-icon bi bi-person-dash"></i>
+    <p>Eliminar Cliente</p>
+   </a>
+   </li>
+   <li class="nav-item">
+   <a href="#" class="nav-link">
+    <i class="nav-icon bi bi-graph-up"></i>
+    <p>Reportes de Ventas</p>
+   </a>
+   </li>
+   <li class="nav-header">ACCESOS</li>
+   <li class="nav-item">
+   <a href="./examples/login.html" class="nav-link">
+    <i class="nav-icon bi bi-box-arrow-in-right"></i>
+    <p>Iniciar Sesión</p>
+   </a>
+   </li>
+   <li class="nav-item">
+   <a href="./examples/register.html" class="nav-link">
+    <i class="nav-icon bi bi-person-add"></i>
+    <p>Registrarse</p>
+   </a>
+   </li>
+  </ul>
+  </nav>
+ </div>
+ </aside>
+ <main class="app-main">
+ <div class="app-content-header">
+  <div class="container-fluid">
+  <div class="row">
+   <div class="col-sm-6">
+   <h3 class="mb-0">Gestión de Productos</h3>
+   </div>
+   <div class="col-sm-6">
+   <ol class="breadcrumb float-sm-end">
+    <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Modificar Producto</li>
+   </ol>
+   </div>
+  </div>
+  </div>
+ </div>
+ <div class="app-content">
+  <div class="container-fluid">
+  <div class="inventory-card p-4">
+   <h2>Modificar Producto</h2>
+   <p class="sub">Haz clic en el botón para buscar un producto por su ID.</p>
+   <button type="button" class="btn btn-se btn-se-primary mt-3" data-bs-toggle="modal" data-bs-target="#searchModal">
+   <i class="bi bi-search me-1"></i> Buscar Producto
+   </button>
+  </div>
+  </div>
+ </div>
+ </main>
+ <footer class="app-footer">
+ <div class="float-end d-none d-sm-inline" style="font-style: normal;">
+  El sabor que te acerca a casa.
+ </div>
+ <strong>
+  Copyright &copy; 2024- 2025
+  &nbsp;
+  <a href="#" class="text-decoration-none" style="font-style: normal;">Sabor Express</a>.
+ </strong>
+ <span style="font-style: normal;">Todos los derechos reservados.</span>
+ </footer>
+</div>
 
-      <div class="filters">
-        <div class="field field--third">
-          <label>Tipo de búsqueda</label>
-          <select id="tipo">
-            <option value="productos">Productos</option>
-            <option value="clientes">Clientes</option>
-            <option value="pedidos">Pedidos</option>
-          </select>
-        </div>
-        <div class="field field--third">
-          <label>Búsqueda (texto)</label>
-          <input id="q" type="text" placeholder="Ej.: proteína, Ana López, PED-1001..." />
-        </div>
-        <div class="field field--quarter">
-          <label>Desde</label>
-          <input id="desde" type="date" />
-        </div>
-        <div class="field field--quarter">
-          <label>Hasta</label>
-          <input id="hasta" type="date" />
-        </div>
-        <div class="field field--third actions">
-          <button id="btnBuscar" class="btn" type="button">Buscar</button>
-          <button id="btnLimpiar" class="btn sec" type="button">Limpiar</button>
-        </div>
-      </div>
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+  <div class="modal-header">
+  <h5 class="modal-title" id="searchModalLabel">Buscar Producto por ID</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <div class="modal-body">
+  <form id="searchForm">
+   <div class="mb-3">
+   <label for="id_producto" class="form-label">ID del Producto</label>
+   <input type="number" class="form-control" id="id_producto" name="id_producto" required min="1">
+   </div>
+   <button type="submit" class="btn btn-se btn-se-primary"><i class="bi bi-search me-1"></i> Buscar</button>
+  </form>
+  <div id="searchMessage" class="status-text mt-3"></div>
+  </div>
+ </div>
+ </div>
+</div>
 
-      <div class="row">
-        <span id="estado" class="hint">Listo para buscar…</span>
-      </div>
+<div class="modal fade" id="modifyModal" tabindex="-1" aria-labelledby="modifyModalLabel" aria-hidden="true">
+ <div class="modal-dialog modal-lg">
+ <div class="modal-content">
+  <div class="modal-header">
+  <h5 class="modal-title" id="modifyModalLabel">Modificar Producto</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <div class="modal-body">
+  <form id="modifyForm">
+   <input type="hidden" id="modify_id" name="id_producto">
+   <div class="row g-3">
+   <div class="col-12 col-md-6">
+    <label for="modify_nombre" class="form-label">Nombre del Producto</label>
+    <input type="text" class="form-control" id="modify_nombre" name="nombre_producto" required>
+   </div>
+   <div class="col-12 col-md-6">
+    <label for="modify_categoria" class="form-label">Categoría</label>
+    <input type="text" class="form-control" id="modify_categoria" name="categoria" required>
+   </div>
+   <div class="col-12 col-md-6">
+    <label for="modify_precio" class="form-label">Precio</label>
+    <input type="number" step="0.01" class="form-control" id="modify_precio" name="precio" required min="0">
+   </div>
+   <div class="col-12 col-md-6">
+    <label for="modify_stock" class="form-label">Stock</label>
+    <input type="number" class="form-control" id="modify_stock" name="stock" required min="0">
+   </div>
+   <div class="col-12 col-md-6">
+    <label for="modify_fecha_ingreso" class="form-label">Fecha de Ingreso</label>
+    <input type="date" class="form-control" id="modify_fecha_ingreso" name="fecha_ingreso" required>
+   </div>
+   <div class="col-12 col-md-6">
+    <label for="modify_fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
+    <input type="date" class="form-control" id="modify_fecha_vencimiento" name="fecha_vencimiento" required>
+   </div>
+   </div>
+   <div class="d-flex gap-2 mt-4">
+   <button type="submit" class="btn btn-se btn-se-primary"><i class="bi bi-save me-1"></i> Guardar Cambios</button>
+   <button type="button" class="btn btn-se btn-se-secondary" data-bs-dismiss="modal">Cancelar</button>
+   </div>
+   <div id="modifyMessage" class="status-text mt-3"></div>
+  </form>
+  </div>
+ </div>
+ </div>
+</div>
 
-      <div class="table-wrap">
-        <table id="tabla">
-          <thead id="thead"></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+  <div class="modal-header">
+  <h5 class="modal-title" id="notificationModalLabel">Notificación</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <div class="modal-body" id="notificationMessage">
+     </div>
+  <div class="modal-footer">
+  <button type="button" class="btn btn-se btn-se-secondary" data-bs-dismiss="modal">Cerrar</button>
+  </div>
+ </div>
+ </div>
+</div>
 
-      <div class="row">
-        <span id="conteo" class="hint"></span>
-      </div>
-    </div>
+<script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script src="./js/adminlte.js"></script>
+<script>
+ const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+ const Default = {
+  scrollbarTheme: 'os-theme-light',
+  scrollbarAutoHide: 'leave',
+  scrollbarClickScroll: true,
+ };
+ document.addEventListener('DOMContentLoaded', function () {
+  const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+  if (sidebarWrapper && OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined) {
+  OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+   scrollbars: {
+   theme: Default.scrollbarTheme,
+   autoHide: Default.scrollbarAutoHide,
+   clickScroll: Default.scrollbarClickScroll,
+   },
+  });
+  }
+ });
+</script>
 
-        <div class="card" style="margin-top:24px;">
-      <h2>Modificar Producto</h2>
-      <p class="sub">Busca un producto por su ID para actualizarlo.</p>
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+  const searchForm = document.getElementById('searchForm');
+  const modifyForm = document.getElementById('modifyForm');
+  const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
+  const modifyModal = new bootstrap.Modal(document.getElementById('modifyModal'));
+  const notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
 
-      <div class="filters">
-        <div class="field field--third">
-          <label>ID del Producto</label>
-          <input id="updateId" type="text" placeholder="Ej.: 123" />
-        </div>
-        <div class="field field--quarter actions">
-          <button id="btnBuscarUpdate" class="btn" type="button">Cargar datos</button>
-        </div>
-      </div>
+  const searchMessage = document.getElementById('searchMessage');
+  const modifyMessage = document.getElementById('modifyMessage');
+  const notificationMessage = document.getElementById('notificationMessage');
 
-      <div id="updateForm" style="display:none;">
-        <div class="filters">
-          <div class="field field--third">
-            <label>Nombre del Producto</label>
-            <input id="updateNombre" type="text" />
-          </div>
-          <div class="field field--third">
-            <label>Precio</label>
-            <input id="updatePrecio" type="number" step="0.01" />
-          </div>
-          <div class="field field--third">
-            <label>Categoría</label>
-            <input id="updateCategoria" type="text" />
-          </div>
-          <div class="field field--third">
-            <label>Fecha de Ingreso</label>
-            <input id="updateFechaIngreso" type="date" />
-          </div>
-          <div class="field field--third">
-            <label>Fecha de Vencimiento</label>
-            <input id="updateFechaVencimiento" type="date" />
-          </div>
-        </div>
-        <div class="row">
-          <span id="updateStatus" class="hint"></span>
-        </div>
-        <div class="actions">
-          <button id="btnUpdateProducto" class="btn" type="button">Actualizar</button>
-          <button id="btnCancelUpdate" class="btn sec" type="button">Cancelar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  // Función para mostrar notificaciones en el modal
+  const showNotification = (message, isSuccess) => {
+   notificationMessage.textContent = message;
+   notificationMessage.classList.toggle('text-success', isSuccess);
+   notificationMessage.classList.toggle('text-danger', !isSuccess);
+   notificationModal.show();
+  };
 
-  <script>
-    const thead = document.getElementById('thead');
-    const tbody = document.getElementById('tbody');
-    const estado = document.getElementById('estado');
-    const conteo = document.getElementById('conteo');
-    const updateForm = document.getElementById('updateForm');
-    const btnBuscarUpdate = document.getElementById('btnBuscarUpdate');
-    const btnUpdateProducto = document.getElementById('btnUpdateProducto');
-    const btnCancelUpdate = document.getElementById('btnCancelUpdate');
-    const updateStatus = document.getElementById('updateStatus');
+  // Lógica para el formulario de búsqueda (Modal)
+  searchForm.addEventListener('submit', async (event) => {
+   event.preventDefault();
+   const id = searchForm.id_producto.value.trim();
 
-    function setStatus(msg, cls='hint'){ estado.className = cls; estado.textContent = msg; }
-    function setUpdateStatus(msg, cls='hint'){ updateStatus.className = cls; updateStatus.textContent = msg; }
+   // **Validación de ID del lado del cliente**
+   if (id === '' || isNaN(id) || parseInt(id) <= 0) {
+    searchMessage.textContent = 'Por favor, ingrese un ID de producto válido y positivo.';
+    searchMessage.classList.remove('loading');
+    searchMessage.classList.add('error');
+    return;
+   }
 
-    function columnasPorTipo(tipo) {
-      if (tipo === 'productos') {
-        return ['IdProducto','NombreProducto','Precio','Categoria','FechaIngreso','FechaVencimiento'];
-      }
-      if (tipo === 'clientes') {
-        return ['IdCliente','NombreCliente','Correo','Telefono','Direccion'];
-      }
-      return ['IdPedido','Cliente','FechaPedido','EstadoPedido','Total'];
-    }
+   searchMessage.textContent = 'Buscando...';
+   searchMessage.classList.add('loading');
+   searchMessage.classList.remove('error');
 
-    function renderHead(cols){
-      thead.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
-    }
+   try {
+    const response = await fetch(`u.php?id_producto=${encodeURIComponent(id)}`);
+    const data = await response.json();
 
-    function renderBody(rows, cols){
-      tbody.innerHTML = rows.map(r => {
-        return '<tr>' + cols.map(c => `<td>${r[c] ?? ''}</td>`).join('') + '</tr>';
-      }).join('');
-    }
+    if (data.error) {
+     searchMessage.textContent = data.error;
+     searchMessage.classList.add('error');
+    } else if (data.producto) {
+     // Llenar el formulario de modificación con los datos obtenidos
+     document.getElementById('modify_id').value = data.producto.IdProducto;
+     document.getElementById('modify_nombre').value = data.producto.NombreProducto;
+     document.getElementById('modify_categoria').value = data.producto.Categoria;
+     document.getElementById('modify_precio').value = data.producto.Precio;
+     document.getElementById('modify_stock').value = data.producto.Stock;
+     document.getElementById('modify_fecha_ingreso').value = data.producto.FechaIngreso;
+     document.getElementById('modify_fecha_vencimiento').value = data.producto.FechaVencimiento;
 
-    async function buscar(){
-      const tipo = document.getElementById('tipo').value;
-      const q = document.getElementById('q').value.trim();
-      const desde = document.getElementById('desde').value;
-      const hasta = document.getElementById('hasta').value;
+     searchModal.hide();
+     modifyModal.show();
+    }
+   } catch (error) {
+    console.error("Error en la búsqueda:", error);
+    searchMessage.textContent = 'Error en la comunicación con el servidor.';
+    searchMessage.classList.add('error');
+   } finally {
+    searchMessage.classList.remove('loading');
+   }
+  });
 
-      const params = new URLSearchParams({ tipo, q, desde, hasta });
-      setStatus('Buscando…', 'loading');
+  // Lógica para el formulario de modificación (Modal)
+  modifyForm.addEventListener('submit', async (event) => {
+   event.preventDefault();
 
-      try {
-        const res = await fetch(`api/buscar.php?${params.toString()}`, { cache: 'no-store' });
-        if(!res.ok) throw new Error('No se pudo obtener resultados');
-        const data = await res.json();
+   const formData = new FormData(modifyForm);
+   const precio = parseFloat(formData.get('precio'));
+   const stock = parseInt(formData.get('stock'));
 
-        if (data.error){
-          setStatus(data.error, 'error');
-          thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
-          return;
-        }
+   // **Validaciones del lado del cliente**
+   if (isNaN(precio) || precio < 0) {
+    modifyMessage.textContent = 'El precio debe ser un número válido y positivo.';
+    modifyMessage.classList.add('error');
+    return;
+   }
+   if (isNaN(stock) || stock < 0) {
+    modifyMessage.textContent = 'El stock debe ser un número entero válido y positivo.';
+    modifyMessage.classList.add('error');
+    return;
+   }
 
-        const cols = columnasPorTipo(tipo);
-        renderHead(cols);
-        renderBody(data.resultados || [], cols);
+   modifyMessage.textContent = 'Guardando cambios...';
+   modifyMessage.classList.add('loading');
+   modifyMessage.classList.remove('error');
 
-        conteo.textContent = `${data.resultados.length} resultado(s)`;
-        setStatus('Listo.');
-      } catch (e){
-        setStatus('Error: ' + e.message, 'error');
-        thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
-      }
-    }
+   try {
+    const response = await fetch('u.php', {
+     method: 'POST',
+     body: formData
+    });
+    const data = await response.json();
 
-    // Cargar datos del producto para actualizar
-    btnBuscarUpdate.addEventListener('click', async () => {
-      const id = document.getElementById('updateId').value.trim();
-      if (!id) {
-        setUpdateStatus('Por favor, ingresa un ID de producto.', 'error');
-        return;
-      }
-
-      setUpdateStatus('Cargando datos...', 'loading');
-      try {
-        const res = await fetch(`api/buscar.php?tipo=productos&id=${id}`, { cache: 'no-store' });
-        if(!res.ok) throw new Error('Error al cargar los datos.');
-        const data = await res.json();
-
-        if (data.error || data.resultados.length === 0){
-          setUpdateStatus('Producto no encontrado.', 'error');
-          updateForm.style.display = 'none';
-          return;
-        }
-        const producto = data.resultados[0];
-        document.getElementById('updateNombre').value = producto.NombreProducto;
-        document.getElementById('updatePrecio').value = producto.Precio;
-        document.getElementById('updateCategoria').value = producto.Categoria;
-        document.getElementById('updateFechaIngreso').value = producto.FechaIngreso;
-        document.getElementById('updateFechaVencimiento').value = producto.FechaVencimiento;
-        updateForm.style.display = 'block';
-        setUpdateStatus('Datos cargados. Puedes modificarlos ahora.', 'hint');
-      } catch (e) {
-        setUpdateStatus('Error: ' + e.message, 'error');
-      }
-    });
-
-    // Actualizar producto
-    btnUpdateProducto.addEventListener('click', async () => {
-      const id = document.getElementById('updateId').value.trim();
-      const nombre = document.getElementById('updateNombre').value;
-      const precio = document.getElementById('updatePrecio').value;
-      const categoria = document.getElementById('updateCategoria').value;
-      const fechaIngreso = document.getElementById('updateFechaIngreso').value;
-      const fechaVencimiento = document.getElementById('updateFechaVencimiento').value;
-
-      if (!id || !nombre || !precio || !categoria || !fechaIngreso) {
-        setUpdateStatus('Todos los campos son obligatorios.', 'error');
-        return;
-      }
-
-      setUpdateStatus('Actualizando...', 'loading');
-      try {
-        const res = await fetch('api/update.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            IdProducto: id,
-            NombreProducto: nombre,
-            Precio: precio,
-            Categoria: categoria,
-            FechaIngreso: fechaIngreso,
-            FechaVencimiento: fechaVencimiento
-          })
-        });
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        setUpdateStatus('¡Producto actualizado con éxito!', 'ok');
-        updateForm.style.display = 'none';
-        document.getElementById('updateId').value = '';
-      } catch (e) {
-        setUpdateStatus('Error: ' + e.message, 'error');
-      }
-    });
-
-    // Cancelar la actualización
-    btnCancelUpdate.addEventListener('click', () => {
-      updateForm.style.display = 'none';
-      document.getElementById('updateId').value = '';
-      setUpdateStatus('Listo para cargar un producto.');
-    });
-
-    document.getElementById('btnBuscar').addEventListener('click', buscar);
-    document.getElementById('btnLimpiar').addEventListener('click', () => {
-      document.getElementById('q').value = '';
-      document.getElementById('desde').value = '';
-      document.getElementById('hasta').value = '';
-      thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
-      setStatus('Listo para buscar…');
-    });
-    document.getElementById('q').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') buscar();
-    });
-  </script>
+    if (data.success) {
+     modifyModal.hide();
+     showNotification(data.message, true);
+     searchForm.reset(); // Limpiar formulario de búsqueda
+    } else {
+     showNotification(data.message, false);
+    }
+   } catch (error) {
+    console.error("Error en la actualización:", error);
+    showNotification('Error en la comunicación con el servidor.', false);
+   } finally {
+    modifyMessage.classList.remove('loading');
+   }
+  });
+ });
+</script>
 </body>
 </html>
