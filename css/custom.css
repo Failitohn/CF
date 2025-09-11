@@ -1,0 +1,94 @@
+/* Reset básico y suavizado de fuentes */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Source Sans 3', sans-serif;
+    line-height: 1.6;
+    background-color: var(--se-light);
+    color: var(--se-text-dark);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Encabezado mejorado */
+.app-header {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar con transición suave */
+.app-sidebar {
+    transition: all 0.3s ease;
+}
+
+.app-sidebar .nav-link {
+    transition: background-color 0.3s ease;
+}
+
+/* Jumbotron con degradado y mayor padding */
+.jumbotron {
+    background: linear-gradient(135deg, #ffffff, #f1f3f5);
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Info-box con efecto hover más marcado */
+.info-box {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Mejoras en el formulario de contacto */
+.contact-form input,
+.contact-form textarea {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: border-color 0.3s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-color: var(--se-primary);
+    outline: none;
+}
+
+/* Botón primario con efectos de hover */
+.btn-se-primary {
+    background-color: var(--se-primary);
+    color: white;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-se-primary:hover {
+    background-color: #72a35d;
+    transform: translateY(-2px);
+}
+
+/* Pie de página centrado y refinado */
+.app-footer {
+    text-align: center;
+    padding: 1rem 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    font-size: 0.875rem;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .app-header, .app-sidebar, .app-main, .app-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
