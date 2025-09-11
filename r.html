@@ -1,197 +1,412 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Búsqueda – Productos, Clientes y Pedidos</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inventario – CRUD (Adaptado a Instituto)</title>
+
+  <!-- Tipografía e íconos (CDN) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="" crossorigin="anonymous">
 
   <style>
+    /* --- Paleta e identidad (adaptada a instituto) --- */
     :root{
-      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
-      --accent:#22d3ee; --accent-2:#06b6d4; --ok:#10b981;
-      --danger:#ef4444; --chip:#1f2937; --border:#1f2937;
+      --bg:#0b1220; --panel:#071026; --muted:#9aa6b8; --text:#e6eef6;
+      --primary:#0ea5a0; --primary-2:#036e6a; --accent:#82f0e8;
+      --success:#10b981; --danger:#ef4444; --surface:#071427; --card:#071427;
+      --radius:14px; --glass: rgba(255,255,255,0.02);
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:linear-gradient(180deg, #0b1220, #0f172a 40%);
-      color:var(--text); min-height:100vh; display:flex;
-      align-items:center; justify-content:center; padding:24px;
+      margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      background:linear-gradient(180deg,#05101a, var(--bg)); color:var(--text);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      padding:20px; display:flex; align-items:flex-start; justify-content:center;
     }
-    .container{ width:min(1100px, 100%); }
-    .card{
-      background:linear-gradient(180deg, #0b1220, #0e1628);
-      border:1px solid var(--border); border-radius:18px; padding:22px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
+
+    /* Container similar to AdminLTE card */
+    .app{ width:min(1150px,100%); }
+    header{ display:flex; gap:12px; align-items:center; margin-bottom:18px }
+    header .brand{ display:flex; gap:12px; align-items:center }
+    .logo{ width:52px; height:52px; border-radius:12px; background:linear-gradient(135deg,var(--primary),var(--primary-2)); display:flex; align-items:center; justify-content:center; font-weight:700 }
+    h1{ font-size:1.15rem; margin:0 }
+    .subtitle{ color:var(--muted); font-size:.9rem }
+
+    .card{ background:linear-gradient(180deg,var(--card), rgba(4,10,18,0.7)); border-radius:var(--radius); padding:18px; border:1px solid rgba(255,255,255,0.03); box-shadow:0 8px 30px rgba(2,6,12,0.6) }
+
+    /* Filters grid (mobile-first) */
+    .filters{ display:grid; gap:10px; grid-template-columns:1fr; margin:12px 0 16px }
+    label{ font-size:.82rem; color:var(--muted); display:block; margin-bottom:6px }
+    input,select,button,textarea{ height:42px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:var(--surface); color:var(--text); outline:none }
+    textarea{ min-height:100px; resize:vertical }
+
+    .actions{ display:flex; gap:8px; flex-wrap:wrap }
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid transparent }
+    .btn.primary{ background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#012; font-weight:600 }
+    .btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--text) }
+    .btn.danger{ background:linear-gradient(90deg,var(--danger),#b91c1c); color:white }
+
+    .row{ display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap }
+    .hint{ color:var(--muted); font-size:.88rem }
+    .badge{ background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:999px; font-weight:600 }
+
+    /* Table */
+    .table-wrap{ margin-top:12px; overflow:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.03) }
+    table{ width:100%; border-collapse:collapse; min-width:720px }
+    thead th{ text-align:left; padding:12px; font-size:.9rem; color:var(--muted); border-bottom:1px solid rgba(255,255,255,0.03) }
+    tbody td{ padding:12px; color:var(--text); border-bottom:1px dashed rgba(255,255,255,0.02) }
+    tbody tr:hover{ background:rgba(255,255,255,0.01) }
+
+    .actions-cell{ display:flex; gap:6px }
+    .small{ font-size:.85rem }
+
+    /* Modal */
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,12,0.6); display:flex; align-items:center; justify-content:center; z-index:50 }
+    .modal{ width:min(720px,95%); background:linear-gradient(180deg,var(--panel), rgba(6,12,20,0.7)); border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.03) }
+    .modal h3{ margin:0 0 8px }
+    .modal .modal-body{ margin-top:12px; display:grid; gap:10px }
+    .modal .form-row{ display:grid; gap:8px; grid-template-columns:1fr; }
+
+    .form-error{ color:var(--danger); font-size:.85rem }
+    .hidden{ display:none }
+
+    /* Responsive breakpoints to satisfy requirement */
+    @media(min-width:720px){ .filters{ grid-template-columns: repeat(12,1fr) }
+      .f-4{ grid-column: span 4 }
+      .f-6{ grid-column: span 6 }
+      .f-3{ grid-column: span 3 }
     }
-    h1{ margin:0 0 8px; font-size:clamp(1.2rem,2.5vw,1.8rem); }
-    .sub{ color:var(--muted); margin:0 0 18px; }
-    .filters{ display:grid; gap:12px; grid-template-columns:repeat(12,1fr); align-items:end; margin:14px 0 18px; }
-    .field{ display:flex; flex-direction:column; gap:6px; grid-column: span 12; }
-    label{ font-size:.9rem; color:var(--muted); }
-    input,select,button{
-      height:42px; padding:0 12px; border-radius:12px; border:1px solid var(--border);
-      background:#0b1323; color:var(--text); outline:none;
-    }
-    .field--third{ grid-column: span 12; }
-    .field--quarter{ grid-column: span 6; }
-    .actions{ display:flex; gap:10px; flex-wrap:wrap }
-    .btn{
-      border:1px solid var(--accent-2);
-      background: radial-gradient(120px 120px at 20% 20%, rgba(34,211,238,.15), transparent 35%), #0c1728;
-      color:#e6fffb; font-weight:600; cursor:pointer;
-      transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(6,182,212,.25); }
-    .btn.sec{ border-color:#334155; color:var(--muted); background:#0b1323 }
-    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; background:var(--chip); color:#cbd5e1; font-size:.78rem; border:1px solid var(--border); }
-    .table-wrap{ overflow:auto; border:1px solid var(--border); border-radius:14px; }
-    table{ width:100%; border-collapse:separate; border-spacing:0; min-width:720px }
-    thead th{
-      position:sticky; top:0; background:#0b1323; color:#cbd5e1;
-      text-align:left; font-weight:600; padding:12px; border-bottom:1px solid var(--border);
-    }
-    tbody td{ padding:12px; border-bottom:1px solid var(--border); color:#e2e8f0 }
-    tbody tr:hover{ background:#0b1422 }
-    .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px }
-    .hint{ color:var(--muted); font-size:.86rem }
-    .loading{ color:var(--accent); }
-    .error{ color:var(--danger); }
-    @media(min-width:720px){
-      .field--third{ grid-column: span 4; }
-      .field--quarter{ grid-column: span 3; }
-    }
+    @media(min-width:1024px){ body{ padding:36px } }
+
+    /* Accessibility helpers */
+    input:invalid{ box-shadow:0 0 0 3px rgba(239,68,68,0.06) }
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+
+    /* Tiny pagination */
+    .pager{ display:flex; gap:6px; align-items:center }
+    .pill{ background:rgba(255,255,255,0.02); padding:6px 8px; border-radius:8px }
+
+    /* Small devices exact widths for testing responsive */
+    @media(max-width:319px){ body{ padding:8px } }
+    @media(max-width:767px){ table{ min-width:unset } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <div class="row">
+  <div class="app">
+    <header class="row">
+      <div class="brand">
+        <div class="logo">IN</div>
         <div>
-          <h1>Buscador de Inventario y Ventas</h1>
-          <p class="sub">Consulta <span class="badge">Productos</span> • <span class="badge">Clientes</span> • <span class="badge">Pedidos</span></p>
+          <h1>Panel - Inventario (CRUD)</h1>
+          <div class="subtitle">Grupo: Administración • Taller UI/UX • Responsive (320 / 768 /1024)</div>
         </div>
       </div>
+      <div class="actions">
+        <button id="btnNuevo" class="btn primary"><i class="fa-solid fa-plus"></i> Nuevo registro</button>
+        <button id="btnExport" class="btn ghost" title="Exportar JSON"><i class="fa-solid fa-file-export"></i> Exportar</button>
+      </div>
+    </header>
 
+    <section class="card">
       <div class="filters">
-        <div class="field field--third">
-          <label>Tipo de búsqueda</label>
+        <div class="f-4">
+          <label for="tipo">Tipo</label>
           <select id="tipo">
             <option value="productos">Productos</option>
             <option value="clientes">Clientes</option>
             <option value="pedidos">Pedidos</option>
           </select>
         </div>
-
-        <div class="field field--third">
-          <label>Búsqueda (texto)</label>
-          <input id="q" type="text" placeholder="Ej.: proteína, Ana López, PED-1001..." />
+        <div class="f-6">
+          <label for="q">Buscar</label>
+          <input id="q" type="search" placeholder="Ej: proteína, Ana López, PED-1001..." />
         </div>
-
-        <div class="field field--quarter">
-          <label>Desde</label>
-          <input id="desde" type="date" />
-        </div>
-        <div class="field field--quarter">
-          <label>Hasta</label>
-          <input id="hasta" type="date" />
-        </div>
-
-        <div class="field field--third actions">
-          <button id="btnBuscar" class="btn" type="button">Buscar</button>
-          <button id="btnLimpiar" class="btn sec" type="button">Limpiar</button>
+        <div class="f-3">
+          <label for="limit">Mostrar</label>
+          <select id="limit"><option>10</option><option>25</option><option>50</option></select>
         </div>
       </div>
 
-      <div class="row">
-        <span id="estado" class="hint">Listo para buscar…</span>
+      <div class="row" style="margin-top:8px">
+        <div class="hint">Resultados: <span id="conteo" class="badge">0</span></div>
+        <div class="pager">
+          <button id="prevPage" class="btn ghost small">«</button>
+          <div class="pill" id="pageInfo">Página 1</div>
+          <button id="nextPage" class="btn ghost small">»</button>
+        </div>
       </div>
 
-      <div class="table-wrap">
+      <div class="table-wrap" aria-live="polite">
         <table id="tabla">
           <thead id="thead"></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
 
-      <div class="row">
-        <span id="conteo" class="hint"></span>
+      <div style="display:flex; justify-content:space-between; margin-top:12px; gap:12px; flex-wrap:wrap">
+        <div class="hint">Nota: la validación ocurre en cliente y hay placeholders para validación en servidor.</div>
+        <div class="actions">
+          <button id="btnLimpiar" class="btn ghost">Limpiar filtros</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal (Crear / Editar) -->
+  <div id="modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" role="document">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <h3 id="modalTitle">Nuevo Registro</h3>
+        <button id="modalClose" class="btn ghost" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formRegistro" novalidate>
+          <div class="form-row">
+            <label for="nombre">Nombre / Descripción</label>
+            <input id="nombre" name="nombre" required minlength="3" placeholder="Nombre del producto / cliente" />
+          </div>
+
+          <div class="form-row" style="grid-template-columns:repeat(2,1fr); display:grid; gap:10px">
+            <div>
+              <label for="precio">Precio (solo productos)</label>
+              <input id="precio" name="precio" type="number" min="0" step="0.01" placeholder="0.00" />
+            </div>
+            <div>
+              <label for="categoria">Categoría</label>
+              <input id="categoria" name="categoria" placeholder="Ej.: Suplementos" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="notas">Notas (opcional)</label>
+            <textarea id="notas" name="notas" placeholder="Información adicional..."></textarea>
+          </div>
+
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px">
+            <div id="formError" class="form-error" aria-live="assertive"></div>
+            <button type="button" id="btnCancelar" class="btn ghost">Cancelar</button>
+            <button type="submit" id="btnGuardar" class="btn primary"><i class="fa-solid fa-save"></i> Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm delete modal -->
+  <div id="modalConfirm" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3>Confirmar eliminación</h3>
+      <p class="hint">¿Desea eliminar este registro? Esta acción no puede deshacerse.</p>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px">
+        <button id="cancelDelete" class="btn ghost">Cancelar</button>
+        <button id="confirmDelete" class="btn danger">Eliminar</button>
       </div>
     </div>
   </div>
 
   <script>
+    // --- Datos locales (simulación) ---
+    const STORAGE_KEY = 'crud_inventario_instituto_v1';
+
+    // Página y paginación
+    let state = { tipo: 'productos', q: '', page: 1, limit: 10 };
+
+    // Sample inicial
+    const seed = () => [
+      { IdProducto:'P-001', NombreProducto:'Proteína Whey 1kg', Precio:25.5, Categoria:'Suplementos', FechaIngreso:'2025-07-01' },
+      { IdProducto:'P-002', NombreProducto:'Mandil de cocina', Precio:12.0, Categoria:'Uniformes', FechaIngreso:'2025-06-15' }
+    ];
+
+    function readStore(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { productos: seed(), clientes: [], pedidos: [] } }catch(e){ return { productos: seed(), clientes: [], pedidos: [] } } }
+    function writeStore(data){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)) }
+
+    // --- UI references ---
     const thead = document.getElementById('thead');
     const tbody = document.getElementById('tbody');
-    const estado = document.getElementById('estado');
     const conteo = document.getElementById('conteo');
+    const tipoSel = document.getElementById('tipo');
+    const qInput = document.getElementById('q');
+    const limitSel = document.getElementById('limit');
+    const pageInfo = document.getElementById('pageInfo');
 
-    function setStatus(msg, cls='hint'){ estado.className = cls; estado.textContent = msg; }
+    const modal = document.getElementById('modal');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const form = document.getElementById('formRegistro');
+    const btnNuevo = document.getElementById('btnNuevo');
+    const btnExport = document.getElementById('btnExport');
 
-    function columnasPorTipo(tipo) {
-      if (tipo === 'productos') {
-        return ['IdProducto','NombreProducto','Precio','Categoria','FechaIngreso','FechaVencimiento'];
-      }
-      if (tipo === 'clientes') {
-        return ['IdCliente','NombreCliente','Correo','Telefono','Direccion'];
-      }
+    let currentEdit = null; // id being edited
+    let deleteTarget = null; // id to delete
+
+    // Columnas por tipo (mejoradas)
+    function columnasPorTipo(tipo){
+      if(tipo==='productos') return ['IdProducto','NombreProducto','Precio','Categoria','FechaIngreso'];
+      if(tipo==='clientes') return ['IdCliente','NombreCliente','Correo','Telefono','Direccion'];
       return ['IdPedido','Cliente','FechaPedido','EstadoPedido','Total'];
     }
 
-    function renderHead(cols){
-      thead.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
-    }
+    function renderHead(cols){ thead.innerHTML = '<tr>' + cols.map(c=>`<th>${c}</th>`).join('') + '<th>Acciones</th></tr>'; }
 
     function renderBody(rows, cols){
-      tbody.innerHTML = rows.map(r => {
-        return '<tr>' + cols.map(c => `<td>${r[c] ?? ''}</td>`).join('') + '</tr>';
+      tbody.innerHTML = rows.map(r=>{
+        const tds = cols.map(c=>`<td>${escapeHtml((r[c]!==undefined && r[c]!==null)? r[c]: '')}</td>`).join('');
+        return `<tr>${tds}<td class="actions-cell">`+
+          `<button class="btn ghost small" data-action="edit" data-id="${escapeHtml((r[cols[0]]||'').toString())}"><i class="fa-solid fa-pen"></i></button>`+
+          `<button class="btn ghost small" data-action="delete" data-id="${escapeHtml((r[cols[0]]||'').toString())}"><i class="fa-solid fa-trash"></i></button>`+
+          `</td></tr>`;
       }).join('');
     }
 
-    async function buscar(){
-      const tipo = document.getElementById('tipo').value;
-      const q = document.getElementById('q').value.trim();
-      const desde = document.getElementById('desde').value;
-      const hasta = document.getElementById('hasta').value;
+    // Simple escape
+    function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-      const params = new URLSearchParams({ tipo, q, desde, hasta });
-      setStatus('Buscando…', 'loading');
+    // Filtrado, paginación
+    function queryData(){
+      const store = readStore();
+      const list = store[state.tipo] || [];
+      const q = state.q.toLowerCase().trim();
+      const filtered = list.filter(item=>{
+        if(!q) return true;
+        return Object.values(item).some(v=> String(v).toLowerCase().includes(q));
+      });
 
-      try {
-        const res = await fetch(`api/buscar.php?${params.toString()}`, { cache: 'no-store' });
-        if(!res.ok) throw new Error('No se pudo obtener resultados');
-        const data = await res.json();
-
-        if (data.error){
-          setStatus(data.error, 'error');
-          thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
-          return;
-        }
-
-        const cols = columnasPorTipo(tipo);
-        renderHead(cols);
-        renderBody(data.resultados || [], cols);
-
-        conteo.textContent = `${data.resultados.length} resultado(s)`;
-        setStatus('Listo.');
-      } catch (e){
-        setStatus('Error: ' + e.message, 'error');
-        thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
-      }
+      const total = filtered.length;
+      const start = (state.page-1)*state.limit;
+      const paged = filtered.slice(start, start+state.limit);
+      return { total, rows: paged };
     }
 
-    document.getElementById('btnBuscar').addEventListener('click', buscar);
-    document.getElementById('btnLimpiar').addEventListener('click', () => {
-      document.getElementById('q').value = '';
-      document.getElementById('desde').value = '';
-      document.getElementById('hasta').value = '';
-      thead.innerHTML = ''; tbody.innerHTML = ''; conteo.textContent = '';
-      setStatus('Listo para buscar…');
+    function updateTable(){
+      const cols = columnasPorTipo(state.tipo);
+      renderHead(cols);
+      const { total, rows } = queryData();
+      renderBody(rows, cols);
+      conteo.textContent = total;
+      pageInfo.textContent = `Página ${state.page}`;
+    }
+
+    // Eventos tabla (delegación)
+    tbody.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const action = btn.dataset.action; const id = btn.dataset.id;
+      if(action==='edit') openEditModal(id);
+      if(action==='delete') openConfirm(id);
     });
 
-    document.getElementById('q').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') buscar();
+    // Nuevo
+    btnNuevo.addEventListener('click', ()=> openCreateModal());
+    document.getElementById('btnLimpiar').addEventListener('click', ()=>{ qInput.value=''; state.q=''; state.page=1; updateTable(); });
+
+    // Export
+    btnExport.addEventListener('click', ()=>{
+      const data = readStore();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='inventario_export.json'; a.click(); URL.revokeObjectURL(url);
     });
+
+    // Pagination
+    document.getElementById('prevPage').addEventListener('click', ()=>{ if(state.page>1){ state.page--; updateTable(); } });
+    document.getElementById('nextPage').addEventListener('click', ()=>{ state.page++; updateTable(); });
+
+    // filtros
+    tipoSel.addEventListener('change', e=>{ state.tipo=e.target.value; state.page=1; updateTable(); });
+    qInput.addEventListener('input', e=>{ state.q=e.target.value; state.page=1; updateTable(); });
+    limitSel.addEventListener('change', e=>{ state.limit=parseInt(e.target.value,10); state.page=1; updateTable(); });
+
+    // Modal controls
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('btnCancelar').addEventListener('click', closeModal);
+
+    function openCreateModal(){ currentEdit=null; document.getElementById('modalTitle').textContent='Nuevo registro'; form.reset(); document.getElementById('precio').value=''; document.getElementById('formError').textContent=''; showModal(); }
+    function openEditModal(id){
+      const store = readStore(); const cols = columnasPorTipo(state.tipo); const list = store[state.tipo] || [];
+      const item = list.find(r => String(r[cols[0]])===String(id));
+      if(!item) return alert('Registro no encontrado en almacenamiento local');
+      currentEdit = id; document.getElementById('modalTitle').textContent='Editar registro';
+      // map common fields to form (best effort)
+      document.getElementById('nombre').value = item.NombreProducto || item.NombreCliente || item.Cliente || '';
+      document.getElementById('precio').value = item.Precio || '';
+      document.getElementById('categoria').value = item.Categoria || '';
+      document.getElementById('notas').value = item.Notas || '';
+      document.getElementById('formError').textContent='';
+      showModal();
+    }
+
+    function openConfirm(id){ deleteTarget = id; modalConfirm.classList.remove('hidden'); }
+    document.getElementById('cancelDelete').addEventListener('click', ()=>{ deleteTarget=null; modalConfirm.classList.add('hidden'); });
+    document.getElementById('confirmDelete').addEventListener('click', ()=>{
+      if(!deleteTarget) return; const store = readStore(); const cols = columnasPorTipo(state.tipo); store[state.tipo] = (store[state.tipo]||[]).filter(r=> String(r[cols[0]])!==String(deleteTarget)); writeStore(store); deleteTarget=null; modalConfirm.classList.add('hidden'); updateTable();
+    });
+
+    function showModal(){ modal.classList.remove('hidden'); document.getElementById('nombre').focus(); }
+    function closeModal(){ modal.classList.add('hidden'); currentEdit=null; }
+
+    // Form submit (cliente + "servidor")
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value.trim();
+      const precio = document.getElementById('precio').value;
+      const categoria = document.getElementById('categoria').value.trim();
+      const notas = document.getElementById('notas').value.trim();
+
+      // Validación cliente
+      if(nombre.length<3){ document.getElementById('formError').textContent='El nombre debe tener al menos 3 caracteres.'; return; }
+      if(precio && Number(precio) < 0){ document.getElementById('formError').textContent='El precio no puede ser negativo.'; return; }
+
+      // Placeholder para validación del servidor: simular petición y respuesta
+      // En implementación real: enviar fetch('/api/productos', {method: currentEdit? 'PUT':'POST', body: JSON.stringify(...)})
+
+      const store = readStore();
+      if(state.tipo === 'productos'){
+        if(currentEdit){ // editar
+          const idx = store.productos.findIndex(p => String(p.IdProducto)===String(currentEdit));
+          if(idx>-1){ store.productos[idx].NombreProducto = nombre; store.productos[idx].Precio = precio? Number(precio): store.productos[idx].Precio; store.productos[idx].Categoria = categoria; store.productos[idx].Notas = notas; }
+        } else {
+          // crear id simple
+          const newId = 'P-' + String((store.productos.length+1).toString().padStart(3,'0'));
+          store.productos.push({ IdProducto:newId, NombreProducto:nombre, Precio: precio? Number(precio):0, Categoria:categoria, FechaIngreso: new Date().toISOString().slice(0,10), Notas: notas });
+        }
+      } else if(state.tipo === 'clientes'){
+        if(currentEdit){ const idx = store.clientes.findIndex(p => String(p.IdCliente)===String(currentEdit)); if(idx>-1){ store.clientes[idx].NombreCliente = nombre; store.clientes[idx].Notas = notas; } }
+        else { const newId = 'C-' + String((store.clientes.length+1).toString().padStart(3,'0')); store.clientes.push({ IdCliente:newId, NombreCliente:nombre, Correo:'', Telefono:'', Direccion:'', Notas:notas }); }
+      } else {
+        // pedidos minimal
+        if(currentEdit){ /* editar pedido */ } else { const newId = 'O-' + String((store.pedidos.length+1).toString().padStart(3,'0')); store.pedidos.push({ IdPedido:newId, Cliente:nombre, FechaPedido:new Date().toISOString().slice(0,10), EstadoPedido:'Pendiente', Total: precio? Number(precio):0 }); }
+      }
+
+      writeStore(store);
+      closeModal(); updateTable();
+    });
+
+    // Inicializar tabla
+    updateTable();
+
+    // Cargar ejemplo si no hay datos (solo la primera vez)
+    (function ensureSeed(){ const s = readStore(); if(!s.productos || s.productos.length===0){ s.productos = seed(); writeStore(s); } })();
+
+    // Keyboard accessibility: ESC close modal
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ if(!modal.classList.contains('hidden')) closeModal(); if(!modalConfirm.classList.contains('hidden')) modalConfirm.classList.add('hidden'); } });
+
+    // Server-side validation note (to implement on backend)
+    /*
+      Recomendación:
+      - Implementar endpoints REST:
+        GET /api/{tipo}  -> lista (soporta ?q=&limit=&page=)
+        POST /api/{tipo} -> crear (valida schema)
+        PUT /api/{tipo}/{id} -> editar
+        DELETE /api/{tipo}/{id} -> eliminar
+      - En el servidor: validar con reglas (ej: nombre required, precio >=0, correo formato) y devolver errores 4xx con { error: 'mensaje', fields: { campo: 'mensaje' }}
+      - Usar CSRF token en formularios si corresponda.
+    */
+
   </script>
 </body>
 </html>
+
+
